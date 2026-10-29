@@ -35,7 +35,9 @@
 #include <QDir>
 #include <QFontDatabase>
 #include <QMessageBox>
+#ifdef KLOGG_USE_NETWORK
 #include <QNetworkProxyFactory>
+#endif
 #include <QUuid>
 
 #ifdef Q_OS_MAC
@@ -53,7 +55,9 @@
 
 #include "mainwindow.h"
 #include "messagereceiver.h"
+#ifdef KLOGG_USE_NETWORK
 #include "versionchecker.h"
+#endif
 
 class KloggApp : public QApplication {
 
@@ -65,7 +69,9 @@ class KloggApp : public QApplication {
     {
         QFontDatabase::addApplicationFont( ":/fonts/DejaVuSansMono.ttf" );
 
+#ifdef KLOGG_USE_NETWORK
         QNetworkProxyFactory::setUseSystemConfiguration( true );
+#endif
 
         qRegisterMetaType<LoadingStatus>( "LoadingStatus" );
         qRegisterMetaType<LinesCount>( "LinesCount" );
@@ -90,12 +96,14 @@ class KloggApp : public QApplication {
             QObject::connect( &messageReceiver_, &MessageReceiver::loadFile, this,
                               &KloggApp::loadFileNonInteractive );
 
+#ifdef KLOGG_USE_NETWORK
             // Version checker notification
             connect( &versionChecker_, &VersionChecker::newVersionFound,
                      [ this ]( const QString& new_version, const QString& url,
                                const QStringList& changes ) {
                          newVersionNotification( new_version, url, changes );
                      } );
+#endif
         }
     }
 
@@ -211,7 +219,9 @@ class KloggApp : public QApplication {
     void startBackgroundTasks()
     {
         LOG_DEBUG << "startBackgroundTasks";
+#ifdef KLOGG_USE_NETWORK
         versionChecker_.startCheck();
+#endif
     }
 
 #ifdef Q_OS_MAC
@@ -331,7 +341,9 @@ class KloggApp : public QApplication {
     std::list<std::pair<WindowSession, MainWindow*>> mainWindows_;
     std::stack<QPointer<MainWindow>> activeWindows_;
 
+#ifdef KLOGG_USE_NETWORK
     VersionChecker versionChecker_;
+#endif
 };
 
 #endif // KLOGG_KLOGGAPP_H

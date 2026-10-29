@@ -43,7 +43,6 @@
 #include "configuration.h"
 #include "containers.h"
 #include "log.h"
-#include <QNetworkReply>
 #include <cassert>
 #include <exception>
 
@@ -86,7 +85,9 @@
 #include "crawlerwidget.h"
 #include "decompressor.h"
 #include "dispatch_to.h"
+#ifdef KLOGG_USE_NETWORK
 #include "downloader.h"
+#endif
 #include "encodings.h"
 #include "favoritefiles.h"
 #include "highlightersdialog.h"
@@ -542,6 +543,10 @@ void MainWindow::createActions()
     openUrlAction = new QAction( tr( action::openUrlText ), this );
     openUrlAction->setStatusTip( tr( action::openUrlStatusTip ) );
     connect( openUrlAction, &QAction::triggered, this, [ this ]( auto ) { this->openUrl(); } );
+#ifndef KLOGG_USE_NETWORK
+    openUrlAction->setEnabled( false );
+    openUrlAction->setVisible( false );
+#endif
 
     overviewVisibleAction = new QAction( tr( action::overviewVisibleText ), this );
     overviewVisibleAction->setCheckable( true );
@@ -957,6 +962,11 @@ void MainWindow::open()
 
 void MainWindow::openRemoteFile( const QUrl& url )
 {
+#ifndef KLOGG_USE_NETWORK
+    QMessageBox::critical( this, tr( "Klogg - File download" ),
+                           tr( "Opening %1 is not supported: this build has no network support" )
+                               .arg( url.toString() ) );
+#else
     Downloader downloader;
 
     QProgressDialog progressDialog;
@@ -986,6 +996,7 @@ void MainWindow::openRemoteFile( const QUrl& url )
         QMessageBox::critical( this, tr( "Klogg - File download" ),
                                tr( "Failed to create temp file" ) );
     }
+#endif
 }
 
 void MainWindow::switchToOpenedFile( QAction* action )

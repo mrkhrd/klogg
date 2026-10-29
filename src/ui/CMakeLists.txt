@@ -42,7 +42,6 @@ add_library(
   ${CMAKE_CURRENT_SOURCE_DIR}/include/tabnamemapping.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/iconloader.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/displayfilepath.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/downloader.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/decompressor.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/fontutils.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/colorlabelsmanager.h
@@ -89,7 +88,6 @@ add_library(
   ${CMAKE_CURRENT_SOURCE_DIR}/src/tabnamemapping.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/iconloader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/displayfilepath.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/downloader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/decompressor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/colorlabelsmanager.cpp
 )
@@ -113,11 +111,16 @@ target_link_libraries(
   PUBLIC project_options
          project_warnings
          klogg_logdata
-         klogg_versioncheck
          klogg_karchive
          Qt${QT_VERSION_MAJOR}::Widgets
          Qt${QT_VERSION_MAJOR}::Xml
 )
+
+if(KLOGG_USE_NETWORK)
+  target_sources(klogg_ui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/downloader.h
+                                  ${CMAKE_CURRENT_SOURCE_DIR}/src/downloader.cpp)
+  target_link_libraries(klogg_ui PUBLIC klogg_versioncheck)
+endif()
 
 if(WIN32)
   target_link_libraries(klogg_ui PUBLIC user32)

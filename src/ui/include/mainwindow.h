@@ -51,7 +51,6 @@
 
 #include "configuration.h"
 #include "crawlerwidget.h"
-#include "downloader.h"
 #include "iconloader.h"
 #include "pathline.h"
 #include "quickfindmux.h"

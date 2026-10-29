@@ -20,6 +20,7 @@ option(KLOGG_USE_LTO "Use link time optimization" ON)
 option(KLOGG_USE_SENTRY "Use Sentry" OFF)
 option(KLOGG_GENERIC_CPU "Build for generic CPU" OFF)
 option(KLOGG_STATIC_BUILD "Link everything statically (static Qt, static TBB)" OFF)
+option(KLOGG_USE_NETWORK "Enable version checking and opening files from URLs" ON)
 option(KLOGG_OSX_DEPLOYMENT_TARGET "Override target MacOS version" "")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -159,6 +160,9 @@ set_project_warnings(project_warnings)
 include(CompilerFlags)
 add_library(project_options INTERFACE)
 set_project_compile_flags(project_options)
+if(KLOGG_USE_NETWORK)
+  target_compile_definitions(project_options INTERFACE KLOGG_USE_NETWORK)
+endif()
 
 # sanitizer options if supported by compiler
 include(Sanitizers)

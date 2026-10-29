@@ -70,6 +70,11 @@ OptionsDialog::OptionsDialog( QWidget* parent )
     setupEncodings();
     setupLanguageList();
 
+#ifndef KLOGG_USE_NETWORK
+    versionCheckingBox->setVisible( false );
+    downloadGroupBox->setVisible( false );
+#endif
+
     // Validators
     QValidator* pollingIntervalValidator = new QIntValidator( PollIntervalMin, PollIntervalMax );
     pollIntervalLineEdit->setValidator( pollingIntervalValidator );
