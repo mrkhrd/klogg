@@ -122,7 +122,7 @@ install(
   BUNDLE DESTINATION .
 )
 
-if(WIN32)
+if(WIN32 AND NOT KLOGG_STATIC_BUILD)
   if(TARGET tbb)
     add_custom_command(
       TARGET klogg

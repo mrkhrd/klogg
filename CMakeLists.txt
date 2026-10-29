@@ -19,6 +19,7 @@ option(KLOGG_BUILD_TESTS "Build tests" ON)
 option(KLOGG_USE_LTO "Use link time optimization" ON)
 option(KLOGG_USE_SENTRY "Use Sentry" OFF)
 option(KLOGG_GENERIC_CPU "Build for generic CPU" OFF)
+option(KLOGG_STATIC_BUILD "Link everything statically (static Qt, static TBB)" OFF)
 option(KLOGG_OSX_DEPLOYMENT_TARGET "Override target MacOS version" "")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)

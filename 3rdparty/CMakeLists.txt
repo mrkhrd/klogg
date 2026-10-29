@@ -5,6 +5,10 @@ include(CPM)
 set(_TMP_CPM_USE_LOCAL_PACKAGES ${CPM_USE_LOCAL_PACKAGES})
 
 cpmaddpackage("gh:simdutf/simdutf@5.6.2")
+if(MSVC AND KLOGG_STATIC_BUILD)
+  # simdutf dllexports some symbols on MSVC by default, which makes klogg.exe export them
+  target_compile_definitions(simdutf PUBLIC SIMDUTF_DLLIMPORTEXPORT=)
+endif()
 cpmaddpackage("gh:foonathan/type_safe@0.2.4")
 cpmaddpackage("gh:RoaringBitmap/CRoaring@4.2.1")
 cpmaddpackage("gh:lemire/streamvbyte@1.0.0")
@@ -51,6 +55,14 @@ if(KLOGG_USE_HYPERSCAN)
   add_library(klogg_hyperscan INTERFACE)
   target_link_libraries(klogg_hyperscan INTERFACE hs)
   target_include_directories(klogg_hyperscan INTERFACE ${hyperscan_SOURCE_DIR}/src)
+  # keep regex engine optimized for speed even in size-optimized builds
+  if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+    foreach(hs_target hs hs_exec hs_runtime hs_compile)
+      if(TARGET ${hs_target})
+        target_compile_options(${hs_target} PRIVATE /O2)
+      endif()
+    endforeach()
+  endif()
 elseif(KLOGG_USE_VECTORSCAN)
   cpmaddpackage(
     NAME
@@ -121,6 +133,18 @@ cpmaddpackage(
   EXCLUDE_FROM_ALL
   YES
 )
+if(KF5Archive_ADDED AND ${QT_VERSION} VERSION_GREATER_EQUAL 6.9)
+  # Qt 6.9+ removed QString::arg() overload for QFlags
+  foreach(karchive_src kar.cpp karchive.cpp krcc.cpp)
+    set(karchive_src_path ${KF5Archive_SOURCE_DIR}/karchive/src/${karchive_src})
+    file(READ ${karchive_src_path} karchive_src_content)
+    string(REPLACE ".arg(mode)" ".arg(mode.toInt())" karchive_src_fixed "${karchive_src_content}")
+    string(REPLACE ".arg(d->mode)" ".arg(d->mode.toInt())" karchive_src_fixed "${karchive_src_fixed}")
+    if(NOT karchive_src_fixed STREQUAL karchive_src_content)
+      file(WRITE ${karchive_src_path} "${karchive_src_fixed}")
+    endif()
+  endforeach()
+endif()
 if(NOT KF5Archive_ADDED)
   find_package(KF5Archive)
   add_library(klogg_karchive INTERFACE)
@@ -286,7 +310,7 @@ if(efsw_ADDED)
   target_compile_definitions(efsw PRIVATE EFSW_FSEVENTS_NOT_SUPPORTED)
 endif()
 
-if(WIN32)
+if(WIN32 AND NOT KLOGG_STATIC_BUILD)
   set(BUILD_SHARED_LIBS ON)
 endif()
 cpmaddpackage(
